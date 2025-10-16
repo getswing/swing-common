@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package player_service;
+
+option go_package = "internal/grpc/proto;proto";
+
+service PlayerService {
+  rpc GetPlayerData (GetPlayerRequest) returns (GetPlayerReply) {}
+}
+
+message GetPlayerRequest {
+  string name = 1;
+}
+
+message GetPlayerReply {
+  string message = 1;
+}
