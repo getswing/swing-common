@@ -13,6 +13,7 @@ import (
 	"getswing.app/player-service/internal/config"
 	"getswing.app/player-service/internal/db"
 	"getswing.app/player-service/internal/models"
+	"getswing.app/player-service/internal/repository"
 	"getswing.app/player-service/internal/shared"
 
 	service "getswing.app/player-service/internal/services"
@@ -74,7 +75,9 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 
-	pb.RegisterPlayerServiceServer(grpcServer, &service.PlayerServiceImpl{})
+	playerRepository := repository.NewPlayerRepository(gormDB)
+
+	pb.RegisterPlayerServiceServer(grpcServer, service.NewPlayerService(playerRepository))
 
 	log.Println("✅ gRPC server running on port 50051...")
 	if err := grpcServer.Serve(listener); err != nil {
