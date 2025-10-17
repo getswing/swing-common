@@ -12,26 +12,26 @@ import (
 type PlayerRepository interface {
 	Create(ctx context.Context, u *models.Player) error
 	FindByEmail(ctx context.Context, email string) (*models.Player, error)
-	FindByID(ctx context.Context, id uint) (*models.Player, error)
+	FindByID(ctx context.Context, id string) (*models.Player, error)
 	FindByPhone(ctx context.Context, phoneNumber, phoneContryCode string) (*models.Player, error)
 }
 
-type userRepo struct {
+type playerRepo struct {
 	db *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) PlayerRepository {
-	return &userRepo{db: db}
+func NewPlayerRepository(db *gorm.DB) PlayerRepository {
+	return &playerRepo{db: db}
 }
 
-func (r *userRepo) Create(ctx context.Context, u *models.Player) error {
+func (r *playerRepo) Create(ctx context.Context, u *models.Player) error {
 	if err := r.db.WithContext(ctx).Create(u).Error; err != nil {
 		return fmt.Errorf("user create: %w", err)
 	}
 	return nil
 }
 
-func (r *userRepo) FindByEmail(ctx context.Context, email string) (*models.Player, error) {
+func (r *playerRepo) FindByEmail(ctx context.Context, email string) (*models.Player, error) {
 	var u models.Player
 	if err := r.db.WithContext(ctx).Where("email = ?", email).First(&u).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -42,7 +42,7 @@ func (r *userRepo) FindByEmail(ctx context.Context, email string) (*models.Playe
 	return &u, nil
 }
 
-func (r *userRepo) FindByPhone(ctx context.Context, phoneNumber, phoneCountryCode string) (*models.Player, error) {
+func (r *playerRepo) FindByPhone(ctx context.Context, phoneNumber, phoneCountryCode string) (*models.Player, error) {
 	var u models.Player
 	if err := r.db.WithContext(ctx).Where("phone_number = ? and phone_country_code", phoneNumber, phoneCountryCode).First(&u).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -53,7 +53,7 @@ func (r *userRepo) FindByPhone(ctx context.Context, phoneNumber, phoneCountryCod
 	return &u, nil
 }
 
-func (r *userRepo) FindByID(ctx context.Context, id uint) (*models.Player, error) {
+func (r *playerRepo) FindByID(ctx context.Context, id string) (*models.Player, error) {
 	var u models.Player
 	if err := r.db.WithContext(ctx).First(&u, id).Error; err != nil {
 		return nil, err

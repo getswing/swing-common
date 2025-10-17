@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.32.1
-// source: internal/grpc/proto/get_player.proto
+// source: proto/player.proto
 
-package proto
+package playerpb
 
 import (
 	context "context"
@@ -19,14 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	PlayerService_GetPlayerData_FullMethodName = "/player_service.PlayerService/GetPlayerData"
+	PlayerService_GetPlayer_FullMethodName = "/player.PlayerService/GetPlayer"
 )
 
 // PlayerServiceClient is the client API for PlayerService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PlayerServiceClient interface {
-	GetPlayerData(ctx context.Context, in *GetPlayerRequest, opts ...grpc.CallOption) (*GetPlayerReply, error)
+	GetPlayer(ctx context.Context, in *GetPlayerRequest, opts ...grpc.CallOption) (*GetPlayerResponse, error)
 }
 
 type playerServiceClient struct {
@@ -37,10 +37,10 @@ func NewPlayerServiceClient(cc grpc.ClientConnInterface) PlayerServiceClient {
 	return &playerServiceClient{cc}
 }
 
-func (c *playerServiceClient) GetPlayerData(ctx context.Context, in *GetPlayerRequest, opts ...grpc.CallOption) (*GetPlayerReply, error) {
+func (c *playerServiceClient) GetPlayer(ctx context.Context, in *GetPlayerRequest, opts ...grpc.CallOption) (*GetPlayerResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetPlayerReply)
-	err := c.cc.Invoke(ctx, PlayerService_GetPlayerData_FullMethodName, in, out, cOpts...)
+	out := new(GetPlayerResponse)
+	err := c.cc.Invoke(ctx, PlayerService_GetPlayer_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (c *playerServiceClient) GetPlayerData(ctx context.Context, in *GetPlayerRe
 // All implementations must embed UnimplementedPlayerServiceServer
 // for forward compatibility.
 type PlayerServiceServer interface {
-	GetPlayerData(context.Context, *GetPlayerRequest) (*GetPlayerReply, error)
+	GetPlayer(context.Context, *GetPlayerRequest) (*GetPlayerResponse, error)
 	mustEmbedUnimplementedPlayerServiceServer()
 }
 
@@ -62,8 +62,8 @@ type PlayerServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedPlayerServiceServer struct{}
 
-func (UnimplementedPlayerServiceServer) GetPlayerData(context.Context, *GetPlayerRequest) (*GetPlayerReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetPlayerData not implemented")
+func (UnimplementedPlayerServiceServer) GetPlayer(context.Context, *GetPlayerRequest) (*GetPlayerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPlayer not implemented")
 }
 func (UnimplementedPlayerServiceServer) mustEmbedUnimplementedPlayerServiceServer() {}
 func (UnimplementedPlayerServiceServer) testEmbeddedByValue()                       {}
@@ -86,20 +86,20 @@ func RegisterPlayerServiceServer(s grpc.ServiceRegistrar, srv PlayerServiceServe
 	s.RegisterService(&PlayerService_ServiceDesc, srv)
 }
 
-func _PlayerService_GetPlayerData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _PlayerService_GetPlayer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetPlayerRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PlayerServiceServer).GetPlayerData(ctx, in)
+		return srv.(PlayerServiceServer).GetPlayer(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PlayerService_GetPlayerData_FullMethodName,
+		FullMethod: PlayerService_GetPlayer_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlayerServiceServer).GetPlayerData(ctx, req.(*GetPlayerRequest))
+		return srv.(PlayerServiceServer).GetPlayer(ctx, req.(*GetPlayerRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -108,14 +108,14 @@ func _PlayerService_GetPlayerData_Handler(srv interface{}, ctx context.Context, 
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var PlayerService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "player_service.PlayerService",
+	ServiceName: "player.PlayerService",
 	HandlerType: (*PlayerServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetPlayerData",
-			Handler:    _PlayerService_GetPlayerData_Handler,
+			MethodName: "GetPlayer",
+			Handler:    _PlayerService_GetPlayer_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "internal/grpc/proto/get_player.proto",
+	Metadata: "proto/player.proto",
 }

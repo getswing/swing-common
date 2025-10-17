@@ -62,3 +62,9 @@ export PATH="$PATH:$(go env GOPATH)/bin"
 Try: 
 protoc --go_out=. --go-grpc_out=. hello.proto
 protoc --go_out=. --go-grpc_out=. services/grpc/proto/hello.proto
+
+
+protoc \
+  --go_out=paths=source_relative:. \
+  --go-grpc_out=paths=source_relative:. \
+  proto/player.proto

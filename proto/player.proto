@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package player;
+
+option go_package = "getswing.app/player-service/proto;playerpb";
+
+service PlayerService {
+  rpc GetPlayer (GetPlayerRequest) returns (GetPlayerResponse);
+}
+
+message GetPlayerRequest {
+  string id = 1;
+}
+
+message Player {
+  string id = 1;
+  string name = 2;
+}
+
+message GetPlayerResponse {
+  repeated Player players = 1;
+}

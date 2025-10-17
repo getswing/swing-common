@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -13,7 +14,11 @@ import (
 	"getswing.app/player-service/internal/db"
 	"getswing.app/player-service/internal/models"
 	"getswing.app/player-service/internal/shared"
-	// mygrpc "getswing.app/player-service/internal/grpc"
+
+	service "getswing.app/player-service/internal/services"
+	pb "getswing.app/player-service/proto"
+
+	"google.golang.org/grpc"
 )
 
 // Global context (shared across the application)
@@ -62,7 +67,19 @@ func main() {
 	}()
 
 	// Start gRPC client/server
-	// mygrpc.InitGrpc(AppCtx)
+	listener, err := net.Listen("tcp", ":50051")
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	grpcServer := grpc.NewServer()
+
+	pb.RegisterPlayerServiceServer(grpcServer, &service.PlayerServiceImpl{})
+
+	log.Println("✅ gRPC server running on port 50051...")
+	if err := grpcServer.Serve(listener); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 
 	// Graceful shutdown
 	select {
