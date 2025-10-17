@@ -44,7 +44,7 @@ func (r *playerRepo) FindByEmail(ctx context.Context, email string) (*models.Pla
 
 func (r *playerRepo) FindByPhone(ctx context.Context, phoneNumber, phoneCountryCode string) (*models.Player, error) {
 	var u models.Player
-	if err := r.db.WithContext(ctx).Where("phone_number = ? and phone_country_code", phoneNumber, phoneCountryCode).First(&u).Error; err != nil {
+	if err := r.db.WithContext(ctx).Where("phone_number = ? and phone_country_code = ?", phoneNumber, phoneCountryCode).First(&u).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, gorm.ErrRecordNotFound
 		}
@@ -55,7 +55,7 @@ func (r *playerRepo) FindByPhone(ctx context.Context, phoneNumber, phoneCountryC
 
 func (r *playerRepo) FindByID(ctx context.Context, id string) (*models.Player, error) {
 	var u models.Player
-	if err := r.db.WithContext(ctx).First(&u, id).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(&u, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &u, nil

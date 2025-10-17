@@ -2,19 +2,54 @@ syntax = "proto3";
 
 package player;
 
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
 option go_package = "getswing.app/player-service/proto;playerpb";
 
 service PlayerService {
   rpc GetPlayer (GetPlayerRequest) returns (GetPlayerResponse);
-}
-
-message GetPlayerRequest {
-  string id = 1;
+  rpc GetPlayerByPhone (GetPlayerByPhoneRequest) returns (GetPlayerResponse);
 }
 
 message Player {
-  string id = 1;
-  string name = 2;
+  string id = 1;                 
+  string first_name = 2;            
+  string last_name = 3;              
+  string username = 4;             
+  string email = 5;                 
+  string phone_country_code = 6;
+  string phone_number = 7;
+  string nationality = 8;
+  string gender = 9;
+  google.protobuf.StringValue image_file_id = 10;
+  google.protobuf.StringValue one_signal_id = 11;
+  string referral_code = 12;
+  string experienced = 13;
+  string subscription_id = 14;
+  string partner_subscriptions = 15;
+  google.protobuf.BoolValue is_beta_tester = 16;
+  google.protobuf.BoolValue is_onboarding = 17; 
+  google.protobuf.BoolValue is_first_buy = 18;  
+  google.protobuf.BoolValue is_default_username = 19;
+  google.protobuf.BoolValue is_first_buy_golf_course = 20;
+  google.protobuf.Timestamp dob = 21;       
+  google.protobuf.Timestamp created_at = 22;
+  google.protobuf.Timestamp updated_at = 23;
+  google.protobuf.Timestamp deleted_at = 24;
+  string password = 25;
+  string email_verification_code = 26;
+  string email_temporary = 27;
+}
+
+message GetPlayerRequest {
+  string key = 28;
+  string find_by = 29;
+}
+
+message GetPlayerByPhoneRequest {
+ string phone_number = 30;
+ string phone_country_code = 31;
 }
 
 message GetPlayerResponse {
