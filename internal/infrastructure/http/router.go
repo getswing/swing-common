@@ -4,15 +4,15 @@ import (
 	"database/sql"
 	"net/http"
 
+	usecase "getswing.app/player-service/internal/app/usecase/auth"
+	"getswing.app/player-service/internal/infrastructure/config"
+	"getswing.app/player-service/internal/infrastructure/db"
+	"getswing.app/player-service/internal/infrastructure/mq"
+
 	amqp "github.com/rabbitmq/amqp091-go"
 
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-
-	"getswing.app/player-service/internal/config"
-	"getswing.app/player-service/internal/db"
-	"getswing.app/player-service/internal/handlers"
-	"getswing.app/player-service/internal/mq"
 )
 
 // Register wires all public and protected routes and middlewares.
@@ -21,7 +21,7 @@ func Register(
 	cfg config.Config,
 	sqlDB *sql.DB,
 	amqpCh *amqp.Channel,
-	authHandler *handlers.AuthHandler,
+	authHandler *usecase.AuthHandler,
 ) {
 	// Public routes
 	e.GET("/health", func(c echo.Context) error {
@@ -40,11 +40,11 @@ func Register(
 
 	// Protected API routes with JWT
 	api := e.Group("/api")
-	api.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+
+	api.Use(echojwt.WithConfig(echojwt.Config{
 		SigningKey:    []byte(cfg.JWTSecret),
 		SigningMethod: "HS256",
 		TokenLookup:   "header:Authorization",
-		AuthScheme:    "Bearer",
 	}))
 
 }

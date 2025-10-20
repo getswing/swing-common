@@ -1,4 +1,3 @@
-# Multi-stage build untuk API
 FROM golang:1.22-alpine AS build
 WORKDIR /app
 RUN apk add --no-cache git ca-certificates

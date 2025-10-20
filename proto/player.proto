@@ -18,38 +18,31 @@ message Player {
   string last_name = 3;              
   string username = 4;             
   string email = 5;                 
-  string phone_country_code = 6;
+  string dialcode = 6;
   string phone_number = 7;
   string nationality = 8;
   string gender = 9;
-  google.protobuf.StringValue image_file_id = 10;
-  google.protobuf.StringValue one_signal_id = 11;
-  string referral_code = 12;
-  string experienced = 13;
-  string subscription_id = 14;
-  string partner_subscriptions = 15;
-  google.protobuf.BoolValue is_beta_tester = 16;
-  google.protobuf.BoolValue is_onboarding = 17; 
-  google.protobuf.BoolValue is_first_buy = 18;  
-  google.protobuf.BoolValue is_default_username = 19;
-  google.protobuf.BoolValue is_first_buy_golf_course = 20;
-  google.protobuf.Timestamp dob = 21;       
-  google.protobuf.Timestamp created_at = 22;
-  google.protobuf.Timestamp updated_at = 23;
-  google.protobuf.Timestamp deleted_at = 24;
-  string password = 25;
-  string email_verification_code = 26;
-  string email_temporary = 27;
+  google.protobuf.StringValue profile_path = 10;
+  string referral_code = 11;
+  string experienced = 12;
+  google.protobuf.BoolValue is_beta_tester = 13;
+  google.protobuf.BoolValue is_onboarding = 14; 
+  google.protobuf.BoolValue is_first_buy = 15;  
+  google.protobuf.BoolValue is_default_username = 16;
+  google.protobuf.BoolValue is_first_buy_golf_course = 17;
+  google.protobuf.Timestamp dob = 18;       
+  google.protobuf.Timestamp created_at = 19;
+  google.protobuf.Timestamp updated_at = 20;
 }
 
 message GetPlayerRequest {
-  string key = 28;
-  string find_by = 29;
+  string key = 1;
+  string find_by = 2;
 }
 
 message GetPlayerByPhoneRequest {
- string phone_number = 30;
- string phone_country_code = 31;
+ string phone_number = 1;
+ string phone_country_code = 2;
 }
 
 message GetPlayerResponse {

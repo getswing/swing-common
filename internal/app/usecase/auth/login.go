@@ -1,13 +1,12 @@
-package handlers
+package usecase
 
 import (
 	"net/http"
 
+	"getswing.app/player-service/internal/app/models"
+	"getswing.app/player-service/internal/app/repository"
+	"getswing.app/player-service/internal/infrastructure/config"
 	"github.com/labstack/echo/v4"
-
-	"getswing.app/player-service/internal/config"
-	"getswing.app/player-service/internal/models"
-	"getswing.app/player-service/internal/repository"
 )
 
 type AuthHandler struct {

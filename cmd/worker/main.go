@@ -7,8 +7,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"getswing.app/player-service/internal/config"
-	"getswing.app/player-service/internal/mq"
+	"getswing.app/player-service/internal/infrastructure/config"
+	"getswing.app/player-service/internal/infrastructure/mq"
 )
 
 const queueName = "todos.created"

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"getswing.app/player-service/internal/config"
+	"getswing.app/player-service/internal/infrastructure/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )

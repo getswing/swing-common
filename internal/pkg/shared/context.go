@@ -1,8 +1,7 @@
 package shared
 
 import (
-	"getswing.app/player-service/internal/config"
-
+	"getswing.app/player-service/internal/infrastructure/config"
 	"github.com/labstack/echo/v4"
 )
 

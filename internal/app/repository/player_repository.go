@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"getswing.app/player-service/internal/models"
+	"getswing.app/player-service/internal/app/models"
 	"gorm.io/gorm"
 )
 

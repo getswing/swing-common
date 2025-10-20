@@ -7,19 +7,18 @@ import (
 	"net"
 	"time"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-
-	"getswing.app/player-service/internal/config"
-	"getswing.app/player-service/internal/db"
-	"getswing.app/player-service/internal/models"
-	"getswing.app/player-service/internal/repository"
-	"getswing.app/player-service/internal/shared"
-
-	service "getswing.app/player-service/internal/services"
+	"getswing.app/player-service/internal/app/models"
+	"getswing.app/player-service/internal/app/repository"
+	"getswing.app/player-service/internal/infrastructure/config"
+	"getswing.app/player-service/internal/infrastructure/db"
+	"getswing.app/player-service/internal/infrastructure/service"
+	"getswing.app/player-service/internal/pkg/shared"
 	pb "getswing.app/player-service/proto"
 
 	"google.golang.org/grpc"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 // Global context (shared across the application)
