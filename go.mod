@@ -1,10 +1,11 @@
-module getswing.app/player-service
+module getswing.app/swing-common
 
 go 1.24.0
 
 toolchain go1.24.4
 
 require (
+	getswing.app/player-service v0.0.0-00010101000000-000000000000
 	github.com/google/uuid v1.6.0
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/rabbitmq/amqp091-go v1.10.0
@@ -15,7 +16,6 @@ require (
 )
 
 require (
-	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/pgx/v5 v5.7.6 // indirect
