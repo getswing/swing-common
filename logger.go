@@ -57,7 +57,7 @@ func InitLumberJack() io.Writer {
 }
 
 // init log
-func Init(serviceName string) {
+func LoggerInit(serviceName string) {
 	ServiceName = serviceName
 
 	if err := os.MkdirAll("./logs", 0o755); err != nil {
@@ -110,15 +110,15 @@ func Print(level LogLevel, msg string) {
 	fmt.Fprintln(GlobalLogger.Writer(), string(data))
 }
 
-func Info(msg string) {
+func LoggerInfo(msg string) {
 	Print(LevelInfo, msg)
 }
 
-func Warn(msg string) {
+func LoggerWarn(msg string) {
 	Print(LevelWarn, msg)
 }
 
-func Error(msg string) {
+func LoggerError(msg string) {
 	Print(LevelError, msg)
 }
 
