@@ -42,6 +42,7 @@ const requestIDKey = contextKey("request_id")
 var (
 	GlobalLogger *log.Logger
 	ServiceName  string
+	Skip         int = 1
 )
 
 func InitLumberJack() io.Writer {
@@ -57,8 +58,12 @@ func InitLumberJack() io.Writer {
 }
 
 // init log
-func LoggerInit(serviceName string) {
+func LoggerInit(serviceName string, skip *int) {
 	ServiceName = serviceName
+
+	if skip != nil {
+		Skip = *skip
+	}
 
 	if err := os.MkdirAll("./logs", 0o755); err != nil {
 		log.Fatalf("failed to create logs directory: %v", err)
@@ -90,36 +95,36 @@ func WithRequestIDFromHeader(ctx context.Context, header string) context.Context
 	return context.WithValue(ctx, requestIDKey, header)
 }
 
-func Print(level LogLevel, msg string) {
-	file, function := getCallerInfo(2)
+func Print(level LogLevel, msg string, data ...interface{}) {
+	file, function := getCallerInfo()
 	entry := LogEntry{
 		Timestamp: time.Now().Format(time.RFC3339),
 		Service:   ServiceName,
 		Level:     level,
-		Message:   msg,
+		Message:   fmt.Sprintf(msg, data...),
 		File:      file,
 		Function:  function,
 	}
 
-	data, err := json.Marshal(entry)
+	dataEntry, err := json.Marshal(entry)
 	if err != nil {
 		log.Printf("failed to marshal log: %v", err)
 		return
 	}
 
-	fmt.Fprintln(GlobalLogger.Writer(), string(data))
+	fmt.Fprintln(GlobalLogger.Writer(), string(dataEntry))
 }
 
-func LoggerInfo(msg string) {
-	Print(LevelInfo, msg)
+func LoggerInfo(msg string, fields ...interface{}) {
+	Print(LevelInfo, msg, fields...)
 }
 
-func LoggerWarn(msg string) {
-	Print(LevelWarn, msg)
+func LoggerWarn(msg string, fields ...interface{}) {
+	Print(LevelWarn, msg, fields...)
 }
 
-func LoggerError(msg string) {
-	Print(LevelError, msg)
+func LoggerError(msg string, fields ...interface{}) {
+	Print(LevelError, msg, fields...)
 }
 
 // gorm logger
@@ -138,8 +143,8 @@ func NewGormLogger(serviceName string) gormLogger.Interface {
 	}
 }
 
-func getCallerInfo(skip int) (file string, function string) {
-	pc, filename, line, ok := runtime.Caller(skip)
+func getCallerInfo() (file string, function string) {
+	pc, filename, line, ok := runtime.Caller(Skip)
 	if !ok {
 		return "unknown", "unknown"
 	}
@@ -181,12 +186,12 @@ func (l *GormJSONLogger) Trace(ctx context.Context, begin time.Time, fc func() (
 		message = fmt.Sprintf("%s | error: %v", message, err)
 	}
 
-	l.writeLog(level, message)
+	l.writeLog(level, message, nil)
 }
 
 // writeLog writes a JSON-formatted log entry.
 func (l *GormJSONLogger) writeLog(level LogLevel, msg string, data ...interface{}) {
-	file, function := getCallerInfo(3)
+	file, function := getCallerInfo()
 
 	entry := LogEntry{
 		Timestamp: time.Now().Format(time.RFC3339),
