@@ -1,4 +1,4 @@
-package common_utils
+package sw
 
 import (
 	"fmt"

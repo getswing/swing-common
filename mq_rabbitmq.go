@@ -1,4 +1,4 @@
-package common_mq
+package sw
 
 import (
 	"fmt"

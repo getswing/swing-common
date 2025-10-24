@@ -1,4 +1,4 @@
-package common_http
+package sw
 
 import (
 	"github.com/labstack/echo/v4"

@@ -1,4 +1,4 @@
-package db
+package sw
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	common_logger "github.com/getswing/swing-common/pkg/logger"
+	
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -24,7 +24,7 @@ func ConnectPostgresDB(cfg CommonDBConfig, serviceName string) (*gorm.DB, *sql.D
 	dbUrl := fmt.Sprintf("postgres://%s:%s@%s:%+v/%s?sslmode=%s", cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort, cfg.DBName, cfg.DBSslMode)
 
 	gormDB, err := gorm.Open(postgres.Open(dbUrl), &gorm.Config{
-		Logger: common_logger.NewGormLogger(serviceName),
+		Logger: sw.NewGormLogger(serviceName),
 	})
 	if err != nil {
 		return nil, nil, fmt.Errorf("gorm open: %w", err)
