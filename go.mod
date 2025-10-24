@@ -1,4 +1,4 @@
-module getswing.app/swing-common
+module github.com/getswing/swing-common
 
 go 1.24.0
 
