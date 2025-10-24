@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -24,7 +23,7 @@ func ConnectPostgresDB(cfg CommonDBConfig, serviceName string) (*gorm.DB, *sql.D
 	dbUrl := fmt.Sprintf("postgres://%s:%s@%s:%+v/%s?sslmode=%s", cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort, cfg.DBName, cfg.DBSslMode)
 
 	gormDB, err := gorm.Open(postgres.Open(dbUrl), &gorm.Config{
-		Logger: sw.NewGormLogger(serviceName),
+		Logger: NewGormLogger(serviceName),
 	})
 	if err != nil {
 		return nil, nil, fmt.Errorf("gorm open: %w", err)
@@ -41,7 +40,7 @@ func ConnectPostgresDB(cfg CommonDBConfig, serviceName string) (*gorm.DB, *sql.D
 	return gormDB, sqlDB, nil
 }
 
-func Ping(ctx context.Context, sqlDB *sql.DB) error {
+func DBPing(ctx context.Context, sqlDB *sql.DB) error {
 	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 	return sqlDB.PingContext(ctx)

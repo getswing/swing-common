@@ -19,7 +19,7 @@ func Connect(url string) (*amqp.Connection, *amqp.Channel, error) {
 	return conn, ch, nil
 }
 
-func Ping(ch *amqp.Channel) error {
+func MQPing(ch *amqp.Channel) error {
 	// Declare a passive queue to check connectivity; alternatively tx/select ok
 	return ch.Qos(1, 0, false)
 }
