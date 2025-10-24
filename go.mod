@@ -5,7 +5,6 @@ go 1.24.0
 toolchain go1.24.4
 
 require (
-	getswing.app/player-service v0.0.0-00010101000000-000000000000
 	github.com/google/uuid v1.6.0
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/rabbitmq/amqp091-go v1.10.0
