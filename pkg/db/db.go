@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	common_logger "getswing.app/player-service/pkg/logger"
+	common_logger "github.com/getswing/swing-common/pkg/logger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )

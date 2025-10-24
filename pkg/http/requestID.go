@@ -1,7 +1,7 @@
 package common_http
 
 import (
-	common_logger "getswing.app/player-service/pkg/logger"
+	common_logger "github.com/getswing/swing-common/pkg/logger"
 	"github.com/labstack/echo/v4"
 )
 
