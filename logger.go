@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"time"
 
@@ -33,6 +34,7 @@ type LogEntry struct {
 	Function  string   `json:"function,omitempty"`
 	Duration  string   `json:"duration,omitempty"`
 	File      string   `json:"file,omitempty"`
+	RequestID string   `json:"request_id,omitempty"`
 }
 
 type contextKey string
@@ -95,7 +97,7 @@ func WithRequestIDFromHeader(ctx context.Context, header string) context.Context
 	return context.WithValue(ctx, requestIDKey, header)
 }
 
-func Print(level LogLevel, msg string, data ...interface{}) {
+func Print(ctx context.Context, level LogLevel, msg string, data ...interface{}) {
 	file, function := getCallerInfo()
 	entry := LogEntry{
 		Timestamp: time.Now().Format(time.RFC3339),
@@ -104,6 +106,7 @@ func Print(level LogLevel, msg string, data ...interface{}) {
 		Message:   fmt.Sprintf(msg, data...),
 		File:      file,
 		Function:  function,
+		RequestID: GetRequestID(ctx),
 	}
 
 	dataEntry, err := json.Marshal(entry)
@@ -115,16 +118,45 @@ func Print(level LogLevel, msg string, data ...interface{}) {
 	fmt.Fprintln(GlobalLogger.Writer(), string(dataEntry))
 }
 
-func LoggerInfo(msg string, fields ...interface{}) {
-	Print(LevelInfo, msg, fields...)
+func LoggerInfo(ctx context.Context, msg string, fields ...interface{}) {
+	Print(ctx, LevelInfo, msg, fields...)
 }
 
-func LoggerWarn(msg string, fields ...interface{}) {
-	Print(LevelWarn, msg, fields...)
+func LoggerWarn(ctx context.Context, msg string, fields ...interface{}) {
+	Print(ctx, LevelWarn, msg, fields...)
 }
 
-func LoggerError(msg string, fields ...interface{}) {
-	Print(LevelError, msg, fields...)
+func LoggerError(ctx context.Context, msg string, fields ...interface{}) {
+	Print(ctx, LevelError, msg, fields...)
+}
+
+func LoggerInfof(ctx context.Context, msg string, fields ...interface{}) {
+	Print(ctx, LevelInfo, msg, fields...)
+}
+
+func LoggerWarnf(ctx context.Context, msg string, fields ...interface{}) {
+	Print(ctx, LevelWarn, msg, fields...)
+}
+
+func LoggerErrorf(ctx context.Context, fields ...interface{}) {
+	logWithLevel(ctx, LevelError, fields...)
+}
+
+func logWithLevel(ctx context.Context, level LogLevel, fields ...interface{}) {
+	msg := formatMessage(fields...)
+	Print(ctx, level, msg)
+}
+
+func formatMessage(v ...interface{}) string {
+	if len(v) == 1 {
+		val := v[0]
+		switch reflect.TypeOf(val).Kind() {
+		case reflect.Struct, reflect.Map, reflect.Slice:
+			b, _ := json.MarshalIndent(val, "", "  ")
+			return string(b)
+		}
+	}
+	return fmt.Sprint(v...)
 }
 
 // gorm logger
@@ -164,15 +196,15 @@ func (l *GormJSONLogger) LogMode(level gormLogger.LogLevel) gormLogger.Interface
 }
 
 func (l *GormJSONLogger) Info(ctx context.Context, msg string, data ...interface{}) {
-	l.writeLog("info", msg, data...)
+	l.writeLog(ctx, "info", msg, data...)
 }
 
 func (l *GormJSONLogger) Warn(ctx context.Context, msg string, data ...interface{}) {
-	l.writeLog("warn", msg, data...)
+	l.writeLog(ctx, "warn", msg, data...)
 }
 
 func (l *GormJSONLogger) Error(ctx context.Context, msg string, data ...interface{}) {
-	l.writeLog("error", msg, data...)
+	l.writeLog(ctx, "error", msg, data...)
 }
 
 func (l *GormJSONLogger) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
@@ -186,11 +218,11 @@ func (l *GormJSONLogger) Trace(ctx context.Context, begin time.Time, fc func() (
 		message = fmt.Sprintf("%s | error: %v", message, err)
 	}
 
-	l.writeLog(level, message, nil)
+	l.writeLog(ctx, level, message, nil)
 }
 
 // writeLog writes a JSON-formatted log entry.
-func (l *GormJSONLogger) writeLog(level LogLevel, msg string, data ...interface{}) {
+func (l *GormJSONLogger) writeLog(ctx context.Context, level LogLevel, msg string, data ...interface{}) {
 	file, function := getCallerInfo()
 
 	entry := LogEntry{
@@ -200,6 +232,7 @@ func (l *GormJSONLogger) writeLog(level LogLevel, msg string, data ...interface{
 		Message:   fmt.Sprintf(msg, data...),
 		File:      file,
 		Function:  function,
+		RequestID: GetRequestID(ctx),
 	}
 
 	_ = json.NewEncoder(l.writer).Encode(entry)
