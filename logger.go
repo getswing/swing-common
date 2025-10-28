@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"reflect"
 	"runtime"
 	"time"
 
@@ -99,11 +98,19 @@ func WithRequestIDFromHeader(ctx context.Context, header string) context.Context
 
 func Print(ctx context.Context, level LogLevel, msg string, data ...interface{}) {
 	file, function := getCallerInfo()
+
+	var formatted string
+	if len(data) > 0 {
+		formatted = fmt.Sprintf(msg, data...)
+	} else {
+		formatted = msg
+	}
+
 	entry := LogEntry{
 		Timestamp: time.Now().Format(time.RFC3339),
 		Service:   ServiceName,
 		Level:     level,
-		Message:   fmt.Sprintf(msg, data...),
+		Message:   formatted,
 		File:      file,
 		Function:  function,
 		RequestID: GetRequestID(ctx),
@@ -118,16 +125,16 @@ func Print(ctx context.Context, level LogLevel, msg string, data ...interface{})
 	fmt.Fprintln(GlobalLogger.Writer(), string(dataEntry))
 }
 
-func LoggerInfo(ctx context.Context, msg string, fields ...interface{}) {
-	Print(ctx, LevelInfo, msg, fields...)
+func LoggerInfo(ctx context.Context, msg string) {
+	Print(ctx, LevelInfo, msg)
 }
 
-func LoggerWarn(ctx context.Context, msg string, fields ...interface{}) {
-	Print(ctx, LevelWarn, msg, fields...)
+func LoggerWarn(ctx context.Context, msg string) {
+	Print(ctx, LevelWarn, msg)
 }
 
-func LoggerError(ctx context.Context, msg string, fields ...interface{}) {
-	Print(ctx, LevelError, msg, fields...)
+func LoggerError(ctx context.Context, msg string) {
+	Print(ctx, LevelError, msg)
 }
 
 func LoggerInfof(ctx context.Context, msg string, fields ...interface{}) {
@@ -138,25 +145,8 @@ func LoggerWarnf(ctx context.Context, msg string, fields ...interface{}) {
 	Print(ctx, LevelWarn, msg, fields...)
 }
 
-func LoggerErrorf(ctx context.Context, fields ...interface{}) {
-	logWithLevel(ctx, LevelError, fields...)
-}
-
-func logWithLevel(ctx context.Context, level LogLevel, fields ...interface{}) {
-	msg := formatMessage(fields...)
-	Print(ctx, level, msg)
-}
-
-func formatMessage(v ...interface{}) string {
-	if len(v) == 1 {
-		val := v[0]
-		switch reflect.TypeOf(val).Kind() {
-		case reflect.Struct, reflect.Map, reflect.Slice:
-			b, _ := json.MarshalIndent(val, "", "  ")
-			return string(b)
-		}
-	}
-	return fmt.Sprint(v...)
+func LoggerErrorf(ctx context.Context, msg string, fields ...interface{}) {
+	Print(ctx, LevelError, msg, fields...)
 }
 
 // gorm logger
