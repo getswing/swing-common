@@ -2,6 +2,7 @@ package sw
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
@@ -15,22 +16,40 @@ type CustomValidator struct {
 func (cv *CustomValidator) Validate(i interface{}) error {
 	if err := cv.Validator.Struct(i); err != nil {
 		if validationErrors, ok := err.(validator.ValidationErrors); ok {
-			var messages []string
+			type FieldError struct {
+				Name    string `json:"name"`
+				Message string `json:"message"`
+			}
+
+			var fieldErrors []FieldError
+
 			for _, e := range validationErrors {
+				field := toSnakeCase(e.Field())
+				var msg string
+
 				switch e.Tag() {
 				case "required":
-					messages = append(messages, fmt.Sprintf("%s is required", toSnakeCase(e.Field())))
+					msg = fmt.Sprintf("%s is required", field)
 				case "e164":
-					messages = append(messages, fmt.Sprintf("%s must be a valid phone number (e.g. +628123456789)", toSnakeCase(e.Field())))
+					msg = fmt.Sprintf("%s must be a valid phone number (e.g. +628123456789)", field)
 				case "numeric":
-					messages = append(messages, fmt.Sprintf("%s must be numeric", toSnakeCase(e.Field())))
+					msg = fmt.Sprintf("%s must be numeric", field)
 				case "oneof":
-					messages = append(messages, fmt.Sprintf("%s must be one of [%s]", toSnakeCase(e.Field()), e.Param()))
+					msg = fmt.Sprintf("%s must be one of [%s]", field, e.Param())
 				default:
-					messages = append(messages, fmt.Sprintf("%s is invalid", toSnakeCase(e.Field())))
+					msg = fmt.Sprintf("%s is invalid", field)
 				}
+
+				fieldErrors = append(fieldErrors, FieldError{
+					Name:    field,
+					Message: msg,
+				})
 			}
-			return echo.NewHTTPError(400, strings.Join(messages, ", "))
+
+			return echo.NewHTTPError(http.StatusUnprocessableEntity, map[string]interface{}{
+				"message": "validation failed",
+				"errors":  fieldErrors,
+			})
 		}
 		return err
 	}
