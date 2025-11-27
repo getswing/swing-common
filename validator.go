@@ -17,7 +17,7 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 	if err := cv.Validator.Struct(i); err != nil {
 		if validationErrors, ok := err.(validator.ValidationErrors); ok {
 			type FieldError struct {
-				Name    string `json:"name"`
+				Field   string `json:"name"`
 				Message string `json:"message"`
 			}
 
@@ -41,14 +41,15 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 				}
 
 				fieldErrors = append(fieldErrors, FieldError{
-					Name:    field,
+					Field:   field,
 					Message: msg,
 				})
 			}
 
 			return echo.NewHTTPError(http.StatusUnprocessableEntity, map[string]interface{}{
-				"message": "validation failed",
-				"errors":  fieldErrors,
+				"status":            "error",
+				"message":           "form validation error",
+				"validation_errors": fieldErrors,
 			})
 		}
 		return err
