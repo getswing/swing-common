@@ -9,6 +9,7 @@ func RequestIDMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		reqID := c.Request().Header.Get("X-Request-ID")
 		ctx := c.Request().Context()
 		ctx = WithRequestIDFromHeader(ctx, reqID)
+		ctx = WithURI(ctx, c.Request().RequestURI)
 		c.SetRequest(c.Request().WithContext(ctx))
 		c.Set("ctx", ctx)
 		c.Response().Header().Set("X-Request-ID", GetRequestID(ctx))
