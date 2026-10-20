@@ -34,11 +34,15 @@ type LogEntry struct {
 	Duration  string   `json:"duration,omitempty"`
 	File      string   `json:"file,omitempty"`
 	RequestID string   `json:"request_id,omitempty"`
+	URI       string   `json:"uri,omitempty"`
 }
 
 type contextKey string
 
-const requestIDKey = contextKey("request_id")
+const (
+	requestIDKey = contextKey("request_id")
+	uriKey       = contextKey("uri")
+)
 
 var (
 	GlobalLogger *log.Logger
@@ -96,6 +100,19 @@ func WithRequestIDFromHeader(ctx context.Context, header string) context.Context
 	return context.WithValue(ctx, requestIDKey, header)
 }
 
+func WithURI(ctx context.Context, uri string) context.Context {
+	return context.WithValue(ctx, uriKey, uri)
+}
+
+func GetURI(ctx context.Context) string {
+	if v := ctx.Value(uriKey); v != nil {
+		if uri, ok := v.(string); ok {
+			return uri
+		}
+	}
+	return ""
+}
+
 func Print(ctx context.Context, level LogLevel, msg string, data ...interface{}) {
 	file, function := getCallerInfo()
 
@@ -114,6 +131,7 @@ func Print(ctx context.Context, level LogLevel, msg string, data ...interface{})
 		File:      file,
 		Function:  function,
 		RequestID: GetRequestID(ctx),
+		URI:       GetURI(ctx),
 	}
 
 	dataEntry, err := json.Marshal(entry)
@@ -223,6 +241,7 @@ func (l *GormJSONLogger) writeLog(ctx context.Context, level LogLevel, msg strin
 		File:      file,
 		Function:  function,
 		RequestID: GetRequestID(ctx),
+		URI:       GetURI(ctx),
 	}
 
 	_ = json.NewEncoder(l.writer).Encode(entry)
