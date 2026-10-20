@@ -71,6 +71,36 @@ For non-Echo code, `WithRequestID(ctx)` creates a new request ID, while
 `WithRequestIDFromHeader(ctx, header)` uses the given ID or generates one if
 the header value is empty. Use `GetRequestID(ctx)` to read the ID.
 
+### Request IDs over gRPC
+
+The request ID travels as the `x-request-id` gRPC metadata key
+(`GRPCRequestIDKey`). Register the client interceptors so every outgoing call
+forwards the ID from `ctx`:
+
+```go
+conn, err := grpc.NewClient(
+	addr,
+	grpc.WithTransportCredentials(insecure.NewCredentials()),
+	grpc.WithUnaryInterceptor(sw.RequestIDUnaryClientInterceptor()),
+	grpc.WithStreamInterceptor(sw.RequestIDStreamClientInterceptor()),
+)
+```
+
+Register the server interceptors so handlers get the caller's ID in `ctx`, or
+a generated one when the caller didn't send it. The ID is also returned in the
+response header metadata.
+
+```go
+grpcServer := grpc.NewServer(
+	grpc.ChainUnaryInterceptor(sw.RequestIDUnaryServerInterceptor()),
+	grpc.ChainStreamInterceptor(sw.RequestIDStreamServerInterceptor()),
+)
+```
+
+For a single call without an interceptor, use
+`sw.OutgoingRequestIDContext(ctx)` on the client and
+`sw.IncomingRequestIDContext(ctx)` on the server.
+
 ## PostgreSQL
 
 `ConnectPostgresDB` returns both the GORM connection and its underlying
