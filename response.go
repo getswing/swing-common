@@ -16,6 +16,7 @@ type ErrorResponseDTO struct {
 	Message   string `json:"message"`
 	Code      int    `json:"code"`
 	RequestId string `json:"request_id"`
+	ErrorCode string `json:"error_code,omitempty"`
 }
 
 func SuccessResponse(c echo.Context, statusCode int, message string, data interface{}) error {
@@ -31,13 +32,14 @@ func SuccessResponse(c echo.Context, statusCode int, message string, data interf
 	return c.JSON(statusCode, response)
 }
 
-func ErrorResponse(c echo.Context, statusCode int, message string) error {
+func ErrorResponse(c echo.Context, statusCode int, message string, errorCode string) error {
 	requestId := c.Response().Header().Get(echo.HeaderXRequestID)
 	response := ErrorResponseDTO{
 		Status:    "error",
 		Message:   message,
 		Code:      statusCode,
 		RequestId: requestId,
+		ErrorCode: errorCode,
 	}
 	c.Logger().Info("ErrorResponse: %v", response)
 	return c.JSON(statusCode, response)
