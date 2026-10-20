@@ -1,6 +1,8 @@
 package sw
 
 import (
+	"encoding/json"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -28,7 +30,11 @@ func SuccessResponse(c echo.Context, statusCode int, message string, data interf
 		RequestId: requestId,
 	}
 
-	c.Logger().Info("SuccessResponse: %v", response)
+	logData, err := json.Marshal(response)
+	if err != nil {
+		return err
+	}
+	LoggerInfof(c.Request().Context(), "SuccessResponse: %s", logData)
 	return c.JSON(statusCode, response)
 }
 
@@ -41,6 +47,10 @@ func ErrorResponse(c echo.Context, statusCode int, message string, errorCode str
 		RequestId: requestId,
 		ErrorCode: errorCode,
 	}
-	c.Logger().Info("ErrorResponse: %v", response)
+	logData, err := json.Marshal(response)
+	if err != nil {
+		return err
+	}
+	LoggerInfof(c.Request().Context(), "ErrorResponse: %s", logData)
 	return c.JSON(statusCode, response)
 }
