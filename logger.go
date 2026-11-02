@@ -14,6 +14,7 @@ import (
 	"github.com/google/uuid"
 	"gopkg.in/natefinch/lumberjack.v2"
 
+	"gorm.io/gorm"
 	gormLogger "gorm.io/gorm/logger"
 )
 
@@ -34,6 +35,8 @@ type LogEntry struct {
 	Duration  string   `json:"duration,omitempty"`
 	File      string   `json:"file,omitempty"`
 	RequestID string   `json:"request_id,omitempty"`
+	TraceID   string   `json:"trace_id,omitempty"`
+	SpanID    string   `json:"span_id,omitempty"`
 	URI       string   `json:"uri,omitempty"`
 }
 
@@ -131,6 +134,8 @@ func Print(ctx context.Context, level LogLevel, msg string, data ...interface{})
 		File:      file,
 		Function:  function,
 		RequestID: GetRequestID(ctx),
+		TraceID:   GetTraceID(ctx),
+		SpanID:    GetSpanID(ctx),
 		URI:       GetURI(ctx),
 	}
 
@@ -140,7 +145,12 @@ func Print(ctx context.Context, level LogLevel, msg string, data ...interface{})
 		return
 	}
 
-	fmt.Fprintln(GlobalLogger.Writer(), string(dataEntry))
+	// fall back to stdout when LoggerInit has not been called (e.g. in tests)
+	var w io.Writer = os.Stdout
+	if GlobalLogger != nil {
+		w = GlobalLogger.Writer()
+	}
+	fmt.Fprintln(w, string(dataEntry))
 }
 
 func LoggerInfo(ctx context.Context, msg string) {
@@ -172,6 +182,7 @@ type GormJSONLogger struct {
 	serviceName string
 	writer      io.Writer
 	level       gormLogger.LogLevel
+	dbSystem    string
 }
 
 func NewGormLogger(serviceName string) gormLogger.Interface {
@@ -181,6 +192,14 @@ func NewGormLogger(serviceName string) gormLogger.Interface {
 		writer:      mw,
 		level:       gormLogger.Info,
 	}
+}
+
+// NewGormLoggerForDialector is NewGormLogger that also tags query spans with
+// the database system of the given dialector (e.g. "postgresql").
+func NewGormLoggerForDialector(serviceName string, dialector gorm.Dialector) gormLogger.Interface {
+	l := NewGormLogger(serviceName).(*GormJSONLogger)
+	l.dbSystem = dbSystemName(dialector.Name())
+	return l
 }
 
 func getCallerInfo() (file string, function string) {
@@ -219,6 +238,8 @@ func (l *GormJSONLogger) Trace(ctx context.Context, begin time.Time, fc func() (
 	sql, rows := fc()
 	elapsed := time.Since(begin)
 
+	traceQuery(ctx, l.dbSystem, begin, elapsed, sql, rows, err)
+
 	message := fmt.Sprintf("[%.3fms] [rows:%v] %s", float64(elapsed.Milliseconds()), rows, sql)
 	var level LogLevel = "info"
 	if err != nil {
@@ -241,6 +262,8 @@ func (l *GormJSONLogger) writeLog(ctx context.Context, level LogLevel, msg strin
 		File:      file,
 		Function:  function,
 		RequestID: GetRequestID(ctx),
+		TraceID:   GetTraceID(ctx),
+		SpanID:    GetSpanID(ctx),
 		URI:       GetURI(ctx),
 	}
 
