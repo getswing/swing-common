@@ -22,8 +22,9 @@ type CommonDBConfig struct {
 func ConnectPostgresDB(cfg CommonDBConfig, serviceName string) (*gorm.DB, *sql.DB, error) {
 	dbUrl := fmt.Sprintf("postgres://%s:%s@%s:%+v/%s?sslmode=%s", cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort, cfg.DBName, cfg.DBSslMode)
 
-	gormDB, err := gorm.Open(postgres.Open(dbUrl), &gorm.Config{
-		Logger: NewGormLogger(serviceName),
+	dialector := postgres.Open(dbUrl)
+	gormDB, err := gorm.Open(dialector, &gorm.Config{
+		Logger: NewGormLoggerForDialector(serviceName, dialector),
 	})
 	if err != nil {
 		return nil, nil, fmt.Errorf("gorm open: %w", err)
