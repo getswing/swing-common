@@ -3,3 +3,4 @@ vendor
 go.sum
 
 .tasks
+.DS_Store
